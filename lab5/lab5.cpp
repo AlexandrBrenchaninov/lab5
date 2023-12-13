@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #include <cmath>
 using namespace std;
-
+const double eps = 1e-4;
 //Подынтегральная функция
 double myFunction(double x) {
 	return (pow(sin(x), 2)) /
@@ -35,31 +35,38 @@ double simpsonFormula(double a, double b, int n) {
 	return (h / 3) * s;
 }
 
-double myFunction(double x, double y) {
+double myFunction(double x, double y) {//Подынтегральная функция для кубатурного метода
 	return 4 - x * x - y * y;
 }
 
-double cubatureMethod(double a, double b, double c, double d, int n) {
-	double h1 = (b - a) / n;
-	double h2 = (d - c) / n;
-
-	double sum = 0.0;
+double cubatureMethod(double a, double b, double c, double d, int m, int n)//Кубатурный метод
+{
+	double dx = (b - a) / (2 * n);
+	double dy = (d - c) / (2 * m);
+	double sum = 0;
+	double res = 0;
 
 	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n; j++) {
-			double xi = a + i * h1;
-			double yj = c + j * h2;
-			sum += myFunction(xi + h1 / 2, yj + h2 / 2);
+		for (int j = 0; j < m; j++) {
+			sum += myFunction(a + (2 * i * dx), c + (2 * j * dy));
+			sum += 4 * myFunction(a + ((2 * i + 1) * dx), c + (2 * j * dy));
+			sum += myFunction(a + ((2 * i + 2) * dx), c + (2 * j * dy));
+			sum += 4 * myFunction(a + (2 * i * dx), c + ((2 * j + 1) * dy));
+			sum += 16 * myFunction(a + ((2 * i + 1) * dx), c + ((2 * j + 1) * dy));
+			sum += 4 * myFunction(a + ((2 * i + 2) * dx), c + ((2 * j + 1) * dy));
+			sum += myFunction(a + (2 * i * dx), c + ((2 * j + 2) * dy));
+			sum += 4 * myFunction(a + ((2 * i + 1) * dx), c + ((2 * j + 2) * dy));
+			sum += myFunction(a + ((2 * i + 2) * dx), c + ((2 * j + 2) * dy));
 		}
 	}
-
-	return h1 * h2 * sum;
+	res = sum * (dx * dy / 9);
+	return res;
 }
+
+
 
 int main()
 {
-
-	double eps = 1e-4;
 	double a = 0;
 	double b = 1.234;
 
@@ -89,23 +96,8 @@ int main()
 	cout << "Formula simpson = " << currentForSimpson << endl;
 	cout << "Number of steps = " << nForSimpson << endl;
 
-	double aForKub = -1.0;
-	double bForKub = 1.0;
-	double cForKub = -1.0;
-	double dForKub = 1.0;
+	double integralCubatureMethod = cubatureMethod(-1, 1, -1, 1, 10, 20);
 
-	int nForSimpsonKub = 1;
-	double previousForSimpsonKub = cubatureMethod(aForKub, bForKub, cForKub, dForKub,nForSimpsonKub);
-	double currentForSimpsonKub = cubatureMethod(aForKub, bForKub, cForKub, dForKub, nForSimpsonKub);
-
-	while ((currentForSimpsonKub - previousForSimpsonKub) > 3 * eps) {
-		nForSimpson *= 2;
-		previousForSimpsonKub = currentForSimpsonKub;
-		currentForSimpsonKub = cubatureMethod(aForKub, bForKub, cForKub, dForKub, nForSimpsonKub);
-	}
-
-	cout << "Formula simpson kub = " << currentForSimpsonKub << endl;
-	cout << "Number of steps = " << nForSimpsonKub << endl;
-
+	cout << "Cubature formula simpsona = " << integralCubatureMethod << endl;
 }
 
